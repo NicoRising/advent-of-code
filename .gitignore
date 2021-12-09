@@ -3,3 +3,4 @@ input.txt
 /2016/*.exe
 /2019/*.class
 /2021/*/target
+/2021/*/Cargo.lock
