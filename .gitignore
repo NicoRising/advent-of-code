@@ -1,0 +1,5 @@
+input.txt
+/2015/*.exe
+/2016/*.exe
+/2019/*.class
+/2021/*/target
