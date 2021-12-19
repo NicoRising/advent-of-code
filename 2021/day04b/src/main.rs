@@ -16,9 +16,10 @@ fn main() {
             boards.last_mut().unwrap().extend(row);
         }
     }
+    let mut final_score = 0;
     for draw in draws.iter() {
-        let mut winner = None;
-        for board in boards.iter_mut() {
+        let mut winners = Vec::new();
+        for (board_index, board) in boards.iter_mut().enumerate() {
             if let Some(index) = board.iter().position(|number| number == draw) {
                 board[index] = 100;
                 let mut is_won = true;
@@ -29,8 +30,8 @@ fn main() {
                     }
                 }
                 if is_won {
-                    winner = Some(board);
-                    break
+                    winners.push(board_index);
+                    continue
                 }
                 is_won = true;
                 for col in 0..5 {
@@ -40,18 +41,26 @@ fn main() {
                     }
                 }
                 if is_won {
-                    winner = Some(board);
+                    winners.push(board_index)
                 }
             }
         }
-        if let Some(board) = winner {
+        if winners.len() > 1 {
+            for winner_index in winners.into_iter().rev() { // Reverses to prevent indexing issues
+                boards.swap_remove(winner_index);
+            }
+        } else if winners.len() == 1 {
+            let winner = boards.swap_remove(*winners.first().unwrap());
             let mut sum = 0;
             for index in 0..25 {
-                if board[index] != 100 {
-                    sum += board[index];
+                if winner[index] != 100 {
+                    sum += winner[index];
                 }
             }
-            println!("{}", sum * draw);
+            final_score = sum * draw;
+        }
+        if boards.is_empty() {
+            println!("{}", final_score);
             break
         }
     }
