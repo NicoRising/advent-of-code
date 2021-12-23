@@ -57,7 +57,7 @@ fn main() {
             element_counts.insert(pair.1, pair_count);
         }
     }
-    *element_counts.get_mut(&initial.chars().nth(0).unwrap()).unwrap() += 2;
+    *element_counts.get_mut(&initial.chars().nth(0).unwrap()).unwrap() += 2; // First and last elements aren't part of two pairs
     *element_counts.get_mut(&initial.chars().nth_back(0).unwrap()).unwrap() += 2;
     let count_iter = element_counts.iter().map(|(_, count)| count / 2);
     println!("{}", count_iter.clone().max().unwrap() - count_iter.clone().min().unwrap());
