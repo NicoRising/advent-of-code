@@ -3,7 +3,7 @@ function main()
 
     open("input.txt") do file
         while !eof(file)
-            frequency += parse(Int, readline(file))       
+            frequency += parse(Int64, readline(file))       
         end
     end
 
