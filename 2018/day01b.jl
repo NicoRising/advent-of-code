@@ -1,10 +1,10 @@
 using DelimitedFiles
 
 function main()
-    changes = readdlm("input.txt", '\n', Int64)
+    changes = vec(readdlm("input.txt", '\n', Int))
 
     frequency = 0
-    visited = Set()
+    visited = Set{Int}()
     index = 1
 
     while !in(frequency, visited)
