@@ -1,5 +1,5 @@
 function priority(item)
-    ascii = convert(Int64, item)
+    ascii = convert(Int, item)
     return ascii - (ascii < 97 ? 38 : 96)
 end
 

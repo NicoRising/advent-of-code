@@ -6,7 +6,7 @@ function main()
 
     for line in lines
         if line != ""
-            sum_cal += parse(Int64, line)
+            sum_cal += parse(Int, line)
         else
             if sum_cal > max_cal
                 max_cal = sum_cal
