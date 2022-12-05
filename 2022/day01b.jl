@@ -17,8 +17,7 @@ function main()
         end
     end
 
-    total = sum(max_cals)
-    print("$total\n")
+    println(sum(max_cals))
 end
 
 main()

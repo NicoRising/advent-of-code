@@ -11,7 +11,7 @@ function main()
         total += priority(first(intersect(group...)))
     end
 
-    print("$total\n")
+    println(total)
 end
 
 main()

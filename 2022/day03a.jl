@@ -18,7 +18,7 @@ function main()
         end
     end
 
-    print("$total\n")
+    println(total)
 end
 
 main()

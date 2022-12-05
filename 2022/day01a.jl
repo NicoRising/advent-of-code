@@ -16,7 +16,7 @@ function main()
         end
     end
 
-    print("$max_cal\n")
+    println(max_cal)
 end
 
 main()

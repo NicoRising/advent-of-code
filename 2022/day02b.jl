@@ -10,7 +10,7 @@ function main()
         score += mod(opponent_move + win_type - 1, 3) + 1
     end
     
-    print("$score\n")
+    println(score)
 end
 
 main()

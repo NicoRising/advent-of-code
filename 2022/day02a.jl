@@ -10,7 +10,7 @@ function main()
         score += 3 * mod(my_move - opponent_move + 1, 3)
     end
     
-    print("$score\n")
+    println(score)
 end
 
 main()
