@@ -9,20 +9,30 @@ enum Orientation {
 
 fn main() {
     let mut file = File::open("input.txt").unwrap();
-    let mut contents = String::new();
-    file.read_to_string(&mut contents).unwrap();
+    let mut input = String::new();
+
+    file.read_to_string(&mut input).unwrap();
+
     let mut dots = HashSet::new();
     let mut folds = Vec::new();
-    for line in contents.lines() {
+
+    for line in input.lines() {
         if let Some((x_str, y_str)) = line.split_once(',') {
             dots.insert((x_str.parse::<u32>().unwrap(), y_str.parse::<u32>().unwrap()));
         } else if !line.is_empty() {
-            let orientation = if line.chars().nth(11).unwrap() == 'x' { Orientation::Horizontal } else { Orientation::Vertical };
+            let orientation = if line.chars().nth(11).unwrap() == 'x' {
+                Orientation::Horizontal
+            } else {
+                Orientation::Vertical
+            };
+
             folds.push((orientation, line[13..].parse::<u32>().unwrap()));
         }
     }
+
     let mut overlaps: u32 = 0;
     let fold = &folds[0];
+
     for dot in dots.iter() {
         match fold.0 {
             Orientation::Horizontal => {
@@ -41,5 +51,6 @@ fn main() {
             }
         }
     }
+
     println!("{}", dots.len() as u32 - overlaps);
 }
