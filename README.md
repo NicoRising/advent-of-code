@@ -17,7 +17,7 @@ won't change the general approches to problems.
 |2019|[Java](https://www.oracle.com/java/)|26|
 |2020|[Python](https://www.python.org)|50|
 |2021|[Rust](https://www.rust-lang.org)|34|
-|2022|[Julia](https://julialang.org)|14|
+|2022|[Julia](https://julialang.org)|16|
 
 ## Licence
 
