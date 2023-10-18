@@ -19,4 +19,3 @@ void main() {
 
     printf("%d\n", ribbon);
 }
-
