@@ -7,7 +7,7 @@ void main() {
     int current = fgetc(input);
 
     while (current != '\n') {
-        floor += current == 40 ? 1 : -1;
+        floor += current == '(' ? 1 : -1;
         current = fgetc(input);
     }
 
