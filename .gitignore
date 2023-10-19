@@ -1,9 +1,10 @@
-input.txt
-
 /2015/*
-/2015/!*.*
+!/2015/*.*
+!/2015/input.txt
 
 /2019/*.class
 
 /2021/*/target
 /2021/*/Cargo.lock
+
+input.txt
