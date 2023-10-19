@@ -1,103 +1,126 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-typedef struct point {
+// (x, y) point
+typedef struct Point {
     int x, y;
-} point;
+} Point;
 
-typedef struct node {
-    point p;
-    struct node *left, *right;
-} node;
+// Binary tree node
+typedef struct Node {
+    Point p;
+    struct Node *left, *right;
+} Node;
 
-int insert(node *head, point p); // Returns zero if the point was already stored,  otherwise stores and returns non-zero
-void place(node *n, point p);
-void display(node *n);
+// Construct a new node and return it
+Node *make_node(Point p);
+
+// Attempt inserting a Point into a binary tree. Return 0 if already stored, otherwise 1
+int insert(Point p, Node *node);
+
+// Recursively free memory allocated to a binary tree
+void free_tree(Node *node);
 
 int main() {
-    FILE *input = fopen("input.txt", "r");
-    point location;
-    location.x = 0;
-    location.y = 0;
-    node *head = malloc(sizeof(node));
-    head->p = location;
-    head->left = NULL;
-    head->right = NULL;
+    FILE *input_file = fopen("input.txt", "r");
+
+    if (input_file == NULL) {
+        printf("Error opening file\n");
+        exit(1);
+    }
+
+    Point curr_loc = {0, 0};
+    Node *head = make_node(curr_loc);
+
     int visited = 1;
-    char current = fgetc(input);
-    while (!feof(input)) {
-        switch(current) {
+    char curr_char = fgetc(input_file);
+
+    while (curr_char != '\n') {
+        switch (curr_char) {
             case '>':
-                location.x++;
-                break;
-            case '<':
-                location.x--;
+                curr_loc.x++;
                 break;
             case '^':
-                location.y++;
+                curr_loc.y++;
+                break;
+            case '<':
+                curr_loc.x--;
                 break;
             case 'v':
-                location.y--;
+                curr_loc.y--;
         }
-        if (insert(head, location)) {
-            visited++;
-        }
-        current = fgetc(input);
+
+        visited += insert(curr_loc, head);
+        curr_char = fgetc(input_file);
     }
+
+    fclose(input_file);
+    free_tree(head);
+
     printf("%d\n", visited);
 }
 
-int insert(node *head, point p) {
-    if (head->p.x<p.x) {
-        if (head->right) {
-            return insert(head->right, p);
+Node *make_node(Point p) {
+    Node *node = malloc(sizeof(Node));
+
+    if (node == NULL) {
+        printf("Error allocating memory\n");
+        exit(1);
+    }
+
+    node->p = p;
+    node->left = NULL;
+    node->right = NULL;
+
+    return node;
+}
+
+int insert(Point p, Node *node) {
+    int x_diff = node->p.x - p.x;
+
+    if (x_diff < 0) {
+        if (node->left != NULL) {
+            return insert(p, node->left);
         } else {
-            head->right = malloc(sizeof(node));
-            place(head->right, p);
+            node->left = make_node(p);
         }
-    } else if (head->p.x>p.x) {
-        if (head->left) {
-            return insert(head->left, p);
+    } else if (x_diff > 0) {
+        if (node->right != NULL) {
+            return insert(p, node->right);
         } else {
-            head->left = malloc(sizeof(node));
-            place(head->left, p);
+            node->right = make_node(p);
         }
-    } else {
-        if (head->p.y<p.y) {
-            if (head->right) {
-                return insert(head->right, p);
+    } else { // Same x, now try y
+        int y_diff = node->p.y - p.y;
+
+        if (y_diff < 0) {
+            if (node->left) {
+                return insert(p, node->left);
             } else {
-                head->right = malloc(sizeof(node));
-                place(head->right, p);
+                node->left = make_node(p);
             }
-        } else if (head->p.y>p.y) {
-            if (head->left) {
-                return insert(head->left, p);
+        } else if (node->p.y>p.y) {
+            if (node->right != NULL) {
+                return insert(p, node->right);
             } else {
-                head->left = malloc(sizeof(node));
-                place(head->left, p);
+                node->right = make_node(p);
             }
-        } else {
+        } else { // Point has been visited already
             return 0;
         }
     }
+
     return 1;
 }
 
-void place(node *n, point p) {
-    n->p = p;
-    n->left = NULL;
-    n->right = NULL;
-}
+void free_tree(Node *node) {
+    if (node->left != NULL) {
+        free_tree(node->left);
+    }
 
-void display(node *head) {
-    printf("(%d, %d)\n", head->p.x, head->p.y);
-    if (head->left) {
-        printf("L: (%d, %d)\n", head->left->p.x, head->left->p.y);
-        display(head->left);
+    if (node->right != NULL) {
+        free_tree(node->right);
     }
-    if (head->right) {
-        printf("R: (%d, %d)\n", head->right->p.x, head->right->p.y);
-        display(head->right);
-    }
+
+    free(node);
 }
