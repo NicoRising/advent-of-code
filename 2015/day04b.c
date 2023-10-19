@@ -52,7 +52,7 @@ void main() {
     printf("%d\n", salt);
 }
 
-void md5_hash(const EVP_MD *md5, const char input[128], unsigned char output[EVP_MAX_MD_SIZE]) {
+void md5_hash(const EVP_MD *md5, const char *input, unsigned char output[EVP_MAX_MD_SIZE]) {
 
     EVP_MD_CTX *md5_ctx = EVP_MD_CTX_new();
 
