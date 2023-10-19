@@ -14,10 +14,10 @@ typedef struct Node {
 } Node;
 
 // Construct a new node and return it
-Node *make_node(Point p);
+Node *make_node(const Point p);
 
 // Attempt inserting a Point into a binary tree, and return false if it was already contained
-bool insert(Point p, Node *node);
+bool insert(const Point p, Node *node);
 
 // Recursively free memory allocated to a binary tree
 void free_tree(Node *node);
@@ -63,7 +63,7 @@ void main() {
     printf("%d\n", visited);
 }
 
-Node *make_node(Point p) {
+Node *make_node(const Point p) {
     Node *node = malloc(sizeof(Node));
 
     if (node == NULL) {
@@ -78,7 +78,7 @@ Node *make_node(Point p) {
     return node;
 }
 
-bool insert(Point p, Node *node) {
+bool insert(const Point p, Node *node) {
     int x_diff = node->p.x - p.x;
 
     if (x_diff < 0) {
