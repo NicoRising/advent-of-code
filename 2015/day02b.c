@@ -1,9 +1,15 @@
 #include <stdio.h>
+#include <stdlib.h>
 
 void main() {
     FILE *input = fopen("input.txt", "r");
 
-    int ribbon = 0;
+    if (input == NULL) {
+        printf("Error opening file\n");
+        exit(1);
+    }
+
+    int ribbon_len = 0;
 
     while (!feof(input)) {
         int l, w, h;
@@ -13,9 +19,10 @@ void main() {
         int lh = l + h;
         int wh = w + h;
 
-        ribbon += (lw < lh ? lw < wh ? lw : wh : lh < wh ? lh : wh) * 2;
-        ribbon += l * w * h;
+        ribbon_len += (lw < lh ? lw < wh ? lw : wh : lh < wh ? lh : wh) * 2;
+        ribbon_len += l * w * h;
     }
 
-    printf("%d\n", ribbon);
+    fclose(input);
+    printf("%d\n", ribbon_len);
 }
