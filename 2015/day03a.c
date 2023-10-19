@@ -1,3 +1,4 @@
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -15,13 +16,13 @@ typedef struct Node {
 // Construct a new node and return it
 Node *make_node(Point p);
 
-// Attempt inserting a Point into a binary tree. Return 0 if already stored, otherwise 1
-int insert(Point p, Node *node);
+// Attempt inserting a Point into a binary tree, and return false if it was already contained
+bool insert(Point p, Node *node);
 
 // Recursively free memory allocated to a binary tree
 void free_tree(Node *node);
 
-int main() {
+void main() {
     FILE *input_file = fopen("input.txt", "r");
 
     if (input_file == NULL) {
@@ -75,7 +76,7 @@ Node *make_node(Point p) {
     return node;
 }
 
-int insert(Point p, Node *node) {
+bool insert(Point p, Node *node) {
     int x_diff = node->p.x - p.x;
 
     if (x_diff < 0) {
@@ -106,11 +107,11 @@ int insert(Point p, Node *node) {
                 node->right = make_node(p);
             }
         } else { // Point has been visited already
-            return 0;
+            return false;
         }
     }
 
-    return 1;
+    return true;
 }
 
 void free_tree(Node *node) {
