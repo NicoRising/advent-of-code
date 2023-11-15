@@ -53,7 +53,6 @@ void main() {
 }
 
 void md5_hash(const EVP_MD *md5, const char *input, unsigned char output[EVP_MAX_MD_SIZE]) {
-
     EVP_MD_CTX *md5_ctx = EVP_MD_CTX_new();
 
     EVP_DigestInit_ex(md5_ctx, md5, NULL);

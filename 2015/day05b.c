@@ -41,5 +41,9 @@ void main() {
         } 
     }
 
+    fclose(input_file);
+    regfree(&repeat_section);
+    regfree(&repeat_with_gap);
+
     printf("%d\n", nice);
 }

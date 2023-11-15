@@ -48,5 +48,10 @@ void main() {
         } 
     }
 
+    fclose(input_file);
+    regfree(&three_vowels);
+    regfree(&double_letter);
+    regfree(&bad_pairs);
+
     printf("%d\n", nice);
 }
