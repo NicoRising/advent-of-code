@@ -10,7 +10,7 @@ won't change the general approches to problems.
 
 |Year|Language|Stars|
 |---|---|---|
-|2015|[C](https://en.wikipedia.org/wiki/C_(programming_language))|7|
+|2015|[C](https://en.wikipedia.org/wiki/C_(programming_language))|12|
 |2016|[C++](https://en.wikipedia.org/wiki/C++)|1|
 |2017|TBD|0|
 |2018|TBD|0|
