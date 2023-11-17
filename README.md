@@ -10,7 +10,7 @@ won't change the general approches to problems.
 
 |Year|Language|Stars|
 |---|---|---|
-|[2015](https://adventofcode.com/2015)|[C](https://en.wikipedia.org/wiki/C_(programming_language))|12|
+|[2015](https://adventofcode.com/2015)|[C](https://en.wikipedia.org/wiki/C_(programming_language))|16|
 |[2016](https://adventofcode.com/2016)|[C++](https://en.wikipedia.org/wiki/C++)|1|
 |[2017](https://adventofcode.com/2017)|TBD|0|
 |[2018](https://adventofcode.com/2018)|TBD|0|
