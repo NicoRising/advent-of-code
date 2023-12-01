@@ -41,8 +41,8 @@ fs.readFile("input.txt", "utf8", (err, text) => {
             const forwardRegex = /\d|zero|one|two|three|four|five|six|seven|eight|nine/;
             const backwardRegex = /\d|orez|eno|owt|eerht|ruof|evif|xis|neves|thgie|enin/;
 
-            let first = line.match(forward_regex)[0];
-            let last = reverse(reverse(line).match(backward_regex)[0]);
+            const first = line.match(forward_regex)[0];
+            const last = reverse(reverse(line).match(backward_regex)[0]);
 
             sum += wordToNum(first) * 10 + wordToNum(last);
         }
