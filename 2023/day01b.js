@@ -1,4 +1,4 @@
-const fs = require('node:fs');
+const fs = require("node:fs");
 
 function reverse(str) {
     return str.split("").reverse().join("");
