@@ -38,8 +38,8 @@ fs.readFile("input.txt", "utf8", (err, text) => {
         let sum = 0
 
         for (const line of lines) {
-            const forward_regex = /\d|zero|one|two|three|four|five|six|seven|eight|nine/;
-            const backward_regex = /\d|orez|eno|owt|eerht|ruof|evif|xis|neves|thgie|enin/;
+            const forwardRegex = /\d|zero|one|two|three|four|five|six|seven|eight|nine/;
+            const backwardRegex = /\d|orez|eno|owt|eerht|ruof|evif|xis|neves|thgie|enin/;
 
             let first = line.match(forward_regex)[0];
             let last = reverse(reverse(line).match(backward_regex)[0]);
