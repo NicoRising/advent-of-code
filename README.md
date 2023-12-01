@@ -18,6 +18,7 @@ won't change the general approches to problems.
 |[2020](https://adventofcode.com/2020)|[Python](https://www.python.org)|50|
 |[2021](https://adventofcode.com/2021)|[Rust](https://www.rust-lang.org)|34|
 |[2022](https://adventofcode.com/2022)|[Julia](https://julialang.org)|36|
+|[2023](https://adventofcode.com/2023)|[Javascript](https://en.wikipedia.org/wiki/JavaScript)|0|
 
 ## Licence
 
