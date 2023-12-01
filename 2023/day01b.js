@@ -35,11 +35,12 @@ fs.readFile("input.txt", "utf8", (err, text) => {
         console.error(err);
     } else {
         const lines = text.split(/\n/).slice(0, -1);
-        let sum = 0
+        let sum = 0;
 
         for (const line of lines) {
-            const forwardRegex = /\d|zero|one|two|three|four|five|six|seven|eight|nine/;
-            const backwardRegex = /\d|orez|eno|owt|eerht|ruof|evif|xis|neves|thgie|enin/;
+            const wordsRegex = "zero|one|two|three|four|five|six|seven|eight|nine";
+            const forwardRegex = new RegExp("\\d|" + wordsRegex);
+            const backwardRegex = new RegExp("\\d|" + reverse(wordsRegex));
 
             const first = line.match(forwardRegex)[0];
             const last = reverse(reverse(line).match(backwardRegex)[0]);

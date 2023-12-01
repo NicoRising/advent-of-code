@@ -5,7 +5,7 @@ fs.readFile("input.txt", "utf8", (err, text) => {
         console.error(err);
     } else {
         const lines = text.split(/\n/).slice(0, -1);
-        let sum = 0
+        let sum = 0;
 
         for (const line of lines) {
             const nums = line.match(/\d/g);
