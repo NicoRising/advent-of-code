@@ -16,7 +16,7 @@ fs.readFile("input.txt", "utf8", (err, text) => {
 
             matchLoop:
             while (match = /\d+/.exec(line.substring(lastMatch))) {
-                let num = match[0];
+                const num = match[0];
                 lastMatch += match.index + num.length;
 
                 const startRow = Math.max(row - 1, 0);
