@@ -1,7 +1,7 @@
 import java.awt.Point;
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Scanner;
 
 public class Day03B{
@@ -9,54 +9,72 @@ public class Day03B{
         Scanner input = new Scanner(new File("input.txt"));
         String[] redInput = input.next().split(",");
         String[] greenInput = input.next().split(",");
-        Point location = new Point();
-        ArrayList<Point> red = new ArrayList<>();
-        for (String move: redInput) {
-            for (int distance = 0; distance < Integer.parseInt(move.substring(1)); distance++) {
-                switch (move.charAt(0)) {
+
+        HashMap<Point, Integer> redPoints = new HashMap<Point, Integer>();
+        Point currLoc = new Point();
+        int wireDist = 1;
+
+        for (String move : redInput) {
+            char dir = move.charAt(0);
+            int length = Integer.parseInt(move.substring(1));
+
+            for (int i = 0; i < length; i++) {
+                switch (dir) {
                     case 'U':
-                        location.translate(0, 1);
+                        currLoc.translate(0, 1);
                         break;
                     case 'D':
-                        location.translate(0, -1);
+                        currLoc.translate(0, -1);
                         break;
                     case 'L':
-                        location.translate(-1, 0);
+                        currLoc.translate(-1, 0);
                         break;
-                    default:
-                        location.translate(1, 0);
+                    case 'R':
+                        currLoc.translate(1, 0);
                 }
-                red.add(new Point(location));
+
+                redPoints.put(new Point(currLoc), wireDist);
+                wireDist++;
             }
         }
-        location.move(0, 0);
-        ArrayList<Point> green = new ArrayList<>();
-        for (String move: greenInput) {
-            for (int distance = 0; distance < Integer.parseInt(move.substring(1)); distance++){
-                switch (move.charAt(0)) {
+
+        currLoc.setLocation(0, 0);
+        wireDist = 1;
+
+        Point minIntersect;
+        int minDist = Integer.MAX_VALUE;
+
+        for (String move : greenInput) {
+            char dir = move.charAt(0);
+            int length = Integer.parseInt(move.substring(1));
+
+            for (int i = 0; i < length; i++) {
+                switch (dir) {
                     case 'U':
-                        location.translate(0, 1);
+                        currLoc.translate(0, 1);
                         break;
                     case 'D':
-                        location.translate(0, -1);
+                        currLoc.translate(0, -1);
                         break;
                     case 'L':
-                        location.translate(-1, 0);
+                        currLoc.translate(-1, 0);
                         break;
-                    default:
-                        location.translate(1, 0);
+                    case 'R':
+                        currLoc.translate(1, 0);
                 }
-                green.add(new Point(location));
+
+                if (!(currLoc.x == 0 && currLoc.y == 0) && redPoints.containsKey(currLoc)) {
+                    int dist = wireDist + redPoints.get(currLoc);
+
+                    if (dist < minDist) {
+                        minDist = dist;
+                    }
+                }
+
+                wireDist++;
             }
         }
-        int min = 0;
-        for (int redStep = 0; redStep < red.size(); redStep++) {
-            for (int greenStep = 0; greenStep < green.size() && (redStep + greenStep < min || min == 0); greenStep++) {
-                if (red.get(redStep).equals(green.get(greenStep)) && (redStep + greenStep < min || min == 0)) {
-                    min = redStep + greenStep + 2; // Account for zero-indexing
-                }
-            }
-        }
-        System.out.println(min);
+
+        System.out.println(minDist);
     }
 }

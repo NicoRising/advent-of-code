@@ -9,52 +9,67 @@ public class Day03A {
         Scanner input = new Scanner(new File("input.txt"));
         String[] redInput = input.next().split(",");
         String[] greenInput = input.next().split(",");
-        Point location = new Point();
-        HashSet<Point> red = new HashSet<>();
-        for (String move: redInput) {
-            for (int distance = 0; distance < Integer.parseInt(move.substring(1)); distance++) {
-                switch (move.charAt(0)) {
+
+        HashSet<Point> redPoints = new HashSet<Point>();
+        Point currLoc = new Point();
+
+        for (String move : redInput) {
+            char dir = move.charAt(0);
+            int length = Integer.parseInt(move.substring(1));
+
+            for (int i = 0; i < length; i++) {
+                switch (dir) {
                     case 'U':
-                        location.translate(0, 1);
+                        currLoc.translate(0, 1);
                         break;
                     case 'D':
-                        location.translate(0, -1);
+                        currLoc.translate(0, -1);
                         break;
                     case 'L':
-                        location.translate(-1, 0);
+                        currLoc.translate(-1, 0);
                         break;
-                    default:
-                        location.translate(1, 0);
+                    case 'R':
+                        currLoc.translate(1, 0);
                 }
-                red.add(new Point(location));
+
+                redPoints.add(new Point(currLoc));
             }
         }
-        location.move(0, 0);
-        HashSet<Point> green = new HashSet<>();
-        for (String move: greenInput) {
-            for (int distance = 0; distance < Integer.parseInt(move.substring(1)); distance++) {
-                switch(move.charAt(0)) {
+
+        currLoc.setLocation(0, 0);
+
+        Point minIntersect;
+        int minDist = Integer.MAX_VALUE;
+
+        for (String move : greenInput) {
+            char dir = move.charAt(0);
+            int length = Integer.parseInt(move.substring(1));
+
+            for (int i = 0; i < length; i++) {
+                switch (dir) {
                     case 'U':
-                        location.translate(0, 1);
+                        currLoc.translate(0, 1);
                         break;
                     case 'D':
-                        location.translate(0, -1);
+                        currLoc.translate(0, -1);
                         break;
                     case 'L':
-                        location.translate(-1, 0);
+                        currLoc.translate(-1, 0);
                         break;
-                    default:
-                        location.translate(1, 0);
+                    case 'R':
+                        currLoc.translate(1, 0);
                 }
-                green.add(new Point(location));
+
+                if (!(currLoc.x == 0 && currLoc.y == 0) && redPoints.contains(currLoc)) {
+                    int dist = Math.abs(currLoc.x) + Math.abs(currLoc.y);
+
+                    if (dist < minDist) {
+                        minDist = dist;
+                    }
+                }
             }
         }
-        location.move(0, 0);
-        for (Point point: red) {
-            if (green.contains(point) && (Math.abs(point.x) + Math.abs(point.y) < Math.abs(location.x) + Math.abs(location.y) || location.x == 0 && location.y == 0)) {
-                location = point;
-            }
-        }
-        System.out.println(Math.abs(location.x) + Math.abs(location.y));
+
+        System.out.println(minDist);
     }
 }
