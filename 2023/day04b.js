@@ -18,7 +18,7 @@ fs.readFile("input.txt", "utf8", (err, text) => {
         }
 
         const cardCounts = Array(lines.length).fill(1);
-        let sum = 0
+        let sum = 0;
         
         for (const [idx, count] of cardCounts.entries()) {
             for (let next = 1; next <= wins[idx]; next++) {
@@ -28,6 +28,6 @@ fs.readFile("input.txt", "utf8", (err, text) => {
             sum += count;
         }
 
-        console.log(sum)
+        console.log(sum);
     }
 });
