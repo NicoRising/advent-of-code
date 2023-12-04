@@ -12,12 +12,8 @@ fs.readFile("input.txt", "utf8", (err, text) => {
             yours = yours.match(/\d+/g);
             winning = winning.match(/\d+/g);
             
-            let matches = 0;
-
-            for (const num of yours) {
-                matches += winning.includes(num);
-            }
-
+            const unique = new Set([...yours, ...winning]).size;
+            const matches = yours.length + winning.length - unique;
             sum += Math.floor(2 ** (matches - 1));
         }
 

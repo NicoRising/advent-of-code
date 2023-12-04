@@ -5,36 +5,29 @@ fs.readFile("input.txt", "utf8", (err, text) => {
         console.error(err);
     } else {
         const lines = text.split("\n").slice(0, -1);
-        const cardMap = new Map()
-        const wins = []
+        const wins = [];
 
         for (const line of lines) {
-            let [yours, winning] = line.split("|");
+            let [yours, winning] = line.substring(line.indexOf(":")).split("|");
             yours = yours.match(/\d+/g);
-            yours = yours.slice(1);
-            yours = [...new Set(yours)];
             winning = winning.match(/\d+/g);
-            
-            let score = 0;
 
-            for (const num of yours) {
-                if (winning.includes(num)) {
-                    score++;
-                }
-            }
-
-            wins.push(score)
+            const unique = new Set([...yours, ...winning]).size;
+            const matches = yours.length + winning.length - unique;
+            wins.push(matches);
         }
 
-        cards = Array(lines.length).fill(1)
+        const cardCounts = Array(lines.length).fill(1);
+        let sum = 0
         
-        for (let card = 0; card < wins.length; card++) {
-            for (let next = card + 1; next <= card + wins[card]; next++) {
-                cards[next] += cards[card];
+        for (const [idx, count] of cardCounts.entries()) {
+            for (let next = 1; next <= wins[idx]; next++) {
+                cardCounts[idx + next] += count;
             }
+
+            sum += count;
         }
 
-        const sum = cards.reduce((partialSum, a) => partialSum + a, 0);
         console.log(sum)
     }
 });
