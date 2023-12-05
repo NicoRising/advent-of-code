@@ -4,29 +4,45 @@ import java.util.Scanner;
 
 public class Day04B {
     public static void main(String[] args) throws FileNotFoundException {
-        String input = new Scanner(new File("input.txt")).next();
-        int min = Integer.parseInt(input.substring(0,input.indexOf('-')));
-        int max = Integer.parseInt(input.substring(input.indexOf('-') + 1));
-        int count = 0;
+        String range[] = new Scanner(new File("input.txt")).next().split("-");
+
+        int min = Integer.parseInt(range[0]);
+        int max = Integer.parseInt(range[1]);
+
+        int valid = 0;
+
+        passwordLoop:
         for (int password = min; password <= max; password++) {
-            String[] numbers = (password + "").split("");
-            boolean pair = false;
-            boolean increases = true;
-            for (int index = 1; index < numbers.length; index++) {
-                if (numbers[index].equals(numbers[index - 1]) && (index <= 1 || !numbers[index].equals(numbers[index - 2]))) {
-                    if ((index >= numbers.length - 1 || !numbers[index].equals(numbers[index + 1]))) {
-                        pair = true;
-                    }
+            boolean hasDouble = false;
+
+            // Go through the number from right to left
+            for (int numIdx = 1; numIdx < 100_000; numIdx *= 10) {
+                int num1 = password / numIdx % 10;
+                int num2 = password / numIdx / 10 % 10;
+
+                int rightNum = -1;
+                int leftNum = -1;
+
+                if (numIdx > 1) {
+                    rightNum = password / (numIdx / 10) % 10;
                 }
-                if (numbers[index].compareTo(numbers[index - 1]) < 0) {
-                    increases = false;
-                    break;
+
+                if (numIdx < 10_000) {
+                    leftNum = password / numIdx / 100 % 10;
+                }
+
+                if (num1 == num2 && rightNum != num1 && leftNum != num1) {
+                    hasDouble = true;
+                } else if (num1 < num2) {
+                    continue passwordLoop;
                 }
             }
-            if (pair && increases) {
-                count += 1;
+
+            if (hasDouble) {
+                valid += 1;
             }
         }
-        System.out.println(count);
+
+        System.out.println(valid);
     }
 }
