@@ -20,7 +20,7 @@ fs.readFile("input.txt", "utf8", (err, text) => {
                 }
             }
 
-            totalWays *= ways
+            totalWays *= ways;
         }
 
         console.log(totalWays);
