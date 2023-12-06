@@ -4,21 +4,8 @@ fs.readFile("input.txt", "utf8", (err, text) => {
     if (err) {
         console.error(err);
     } else {
-        let [times, distances] = text.split("\n").map(line => line.match(/\d+/g));
-        const time = Number(times.reduce((acc, a) => acc + a, ""));
-        const distance = Number(distances.reduce((acc, a) => acc + a, ""));
-
-        console.log(time);
-        console.log(distance);
-
-        let ways = 0;
-
-        for (let holdTime = 0; holdTime < time; holdTime++) {
-            if (holdTime * (time - holdTime) > distance) {
-                ways++;
-            }
-        }
-
-        console.log(ways);
+        const [time, distance] = text.replace(/ /g, "").match(/\d+/g);
+        // OK, now I'll use the quadratic equation
+        console.log(Math.floor(Math.sqrt(time * time - 4 * distance)));
     }
 });
