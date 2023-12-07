@@ -1,27 +1,53 @@
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Scanner;
+import java.io.*;
+import java.util.*;
 
 public class Day06B {
     public static void main(String[] args) throws FileNotFoundException {
         Scanner input = new Scanner(new File("input.txt"));
-        HashMap<String, String> reverseOrbitals = new HashMap<>();
+        Map<String, String> reverseOrbitals = new HashMap<String, String>();
+
         while (input.hasNext()) {
-            String orbital = input.next();
-            String parent = orbital.substring(0,orbital.indexOf(')'));
-            String satallite = orbital.substring(orbital.indexOf(')') + 1);
+            String[] bodies = input.next().split("\\)");
+            String parent = bodies[0];
+            String satallite = bodies[1];
+
             reverseOrbitals.put(satallite, parent);
         }
-        ArrayList<String> youPath = new ArrayList<>();
-        ArrayList<String> santaPath = new ArrayList<>();
-        youPath.add(reverseOrbitals.get("YOU"));
-        santaPath.add(reverseOrbitals.get("SAN"));
-        while (!santaPath.contains(youPath.get(youPath.size() - 1))) {
-            youPath.add(reverseOrbitals.get(youPath.get(youPath.size() - 1)));
-            santaPath.add(reverseOrbitals.get(santaPath.get(santaPath.size() - 1)));
+
+        List<String> youPath = new ArrayList<String>();
+        List<String> santaPath = new ArrayList<String>();
+
+        Set<String> youVisited = new HashSet<String>();
+        Set<String> santaVisited = new HashSet<String>();
+
+        String youNext = "YOU";
+        String santaNext = "SAN";
+
+        boolean intersected = false;
+
+        while (!intersected) {
+            // If one hits the root, it shouldn't matter since get() will just return null
+            youNext = reverseOrbitals.get(youNext);
+            santaNext = reverseOrbitals.get(santaNext);
+
+            youPath.add(youNext);
+            santaPath.add(santaNext);
+
+            youVisited.add(youNext);
+            santaVisited.add(santaNext);
+
+            intersected = santaVisited.contains(youNext);
+
         }
-        System.out.println(youPath.size() + santaPath.indexOf(youPath.get(youPath.size() - 1)) - 1);
+
+        int transfers;
+
+        if (santaVisited.contains(youNext)) {
+            transfers = youPath.size() + santaPath.indexOf(youNext) - 1;
+        } else {
+            transfers = santaPath.size() + youPath.indexOf(santaNext) - 1;
+        }
+
+        System.out.println(transfers);
     }
 }
