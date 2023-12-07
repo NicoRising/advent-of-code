@@ -37,7 +37,7 @@ function strength(hand) {
         strength.push(rank.indexOf(card));
     }
 
-    return strength
+    return strength;
 }
 
 fs.readFile("input.txt", "utf8", (err, text) => {
@@ -62,7 +62,7 @@ fs.readFile("input.txt", "utf8", (err, text) => {
         let sum = 0;
 
         for (const [idx, line] of lines.entries()) {
-            sum += (idx + 1) * Number(line[1])
+            sum += (idx + 1) * Number(line[1]);
         }
 
         console.log(sum);
