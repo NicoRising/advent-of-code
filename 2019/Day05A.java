@@ -1,47 +1,136 @@
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Scanner;
 
 public class Day05A {
     public static void main(String[] args) throws FileNotFoundException {
-        String[] input = new Scanner(new File("Input.txt")).next().split(",");
+        String[] input = new Scanner(new File("input.txt")).next().split(",");
         int[] program = new int[input.length];
+
         for (int index = 0; index < input.length; index++) {
             program[index] = Integer.parseInt(input[index]);
         }
-        int index = 0;
-        boolean halt = false;
-        int in = 1;
-        int out = 0;
-        while (!halt) {
-            String command = program[index] + "";
-            while (command.length() < 5) {
-                command = '0' + command;
-            }
-            int op = Integer.parseInt(command.substring(3));
-            int mode1 = Integer.parseInt(command.charAt(2) + "");
-            int mode2 = Integer.parseInt(command.charAt(1) + "");
-            switch (op) {
-                case 1:
-                    program[program[index + 3]] = (mode1 == 0 ? program[program[index + 1]] : program[index + 1]) + (mode2 == 0 ? program[program[index + 2]] : program[index + 2]);
-                    index += 4;
-                    break;
-                case 2:
-                    program[program[index + 3]] = (mode1 == 0 ? program[program[index + 1]] : program[index + 1]) * (mode2 == 0 ? program[program[index + 2]] : program[index + 2]);
-                    index += 4;
-                    break;
-                case 3:
-                    program[program[index + 1]] = in;
-                    index += 2;
-                    break;
-                case 4:
-                    out = mode1 == 0 ? program[program[index + 1]] : program[index + 1];
-                    index += 2;
-                    break;
-                default:
-                halt = true;
+
+        IntComputer computer = new IntComputer(program);
+        computer.run();
+        computer.write(1);
+
+        int lastRead = 0;
+
+        while (!computer.isHalted) {
+            lastRead = computer.read();
+        }
+
+        System.out.println(lastRead + "");
+    }
+
+    private static class IntComputer {
+        int[] originalProgram;
+        int[] program;
+
+        int pointer;
+
+        boolean isHalted;
+        boolean awaitingInput;
+        boolean awaitingOutput;
+
+        int inputIdx;
+        int output;
+
+        public IntComputer(int[] program) {
+            this.originalProgram = program;
+            reset();
+        }
+
+        public void reset() {
+            this.program = originalProgram.clone();
+            pointer = 0;
+
+            isHalted = false;
+            awaitingInput = false;
+            awaitingOutput = false;
+        }
+
+        public void dump() {
+            System.out.println(Arrays.toString(program));
+        }
+
+        public void run() {
+            while (!isHalted && !awaitingInput && !awaitingOutput) {
+                int op = program[pointer++];
+                int[] operands;
+
+                switch (op % 100) {
+                    case 1:
+                        // Add
+                        operands = getOperands(op, 2);
+                        program[program[pointer++]] = operands[0] + operands[1];
+                        break;
+                    case 2:
+                        // Multiply
+                        operands = getOperands(op, 2);
+                        program[program[pointer++]] = operands[0] * operands[1];
+                        break;
+                    case 3:
+                        // Input
+                        awaitingInput = true;
+                        inputIdx = program[pointer++];
+                        break;
+                    case 4:
+                        // Output
+                        operands = getOperands(op, 1);
+                        awaitingOutput = true;
+                        output = operands[0];
+                        break;
+                    case 99:
+                        // Halt
+                        isHalted = true;
+                        break;
+                    default:
+                        throw new RuntimeException("Unknown opcode: " + op);
+                }
             }
         }
-        System.out.println(out);
+
+        public int[] getOperands(int op, int arity) {
+            int[] operands = new int[arity];
+
+            for (int idx = 0, mag = 100; idx < arity; idx++, mag *= 10) {
+                operands[idx] = program[op / mag % 10 == 0 ? program[pointer++] : pointer++];
+            }
+
+            return operands;
+        }
+
+        public void write(int input) {
+            if (awaitingInput) {
+                awaitingInput = false;
+                program[inputIdx] = input;
+                run();
+            } else {
+                throw new RuntimeException("Attempted to input while not awaiting input: " + input);
+            }
+        }
+
+        public int read() {
+            return read(false);
+        }
+
+        public int read(boolean print) {
+            if (awaitingOutput) {
+                awaitingOutput = false;
+                run();
+
+                if (print) {
+                    System.out.println(output + "");
+                }
+
+                return output;
+            } else {
+                throw new RuntimeException("Attempted to output while not awaiting output");
+            }
+        }
     }
 }

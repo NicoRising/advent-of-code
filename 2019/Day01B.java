@@ -14,7 +14,7 @@ public class Day01B {
         System.out.println(sum);
     }
 
-    public static int calculateFuel(int mass){
+    private static int calculateFuel(int mass){
         if (mass <= 0) {
             return 0;
         } else {

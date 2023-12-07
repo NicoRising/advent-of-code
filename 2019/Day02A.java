@@ -42,7 +42,7 @@ public class Day02A {
                     halt = true;
                     break;
                 default:
-                    throw new RuntimeException("Invalid opcode: " + program[idx]);
+                    throw new RuntimeException("Unknown opcode: " + program[idx]);
             }
         }
 
