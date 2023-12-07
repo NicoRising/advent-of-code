@@ -1,8 +1,6 @@
 import java.awt.Point;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.util.HashSet;
-import java.util.Scanner;
+import java.io.*;
+import java.util.*;
 
 public class Day03A {
     public static void main(String[] args) throws FileNotFoundException {
@@ -10,7 +8,7 @@ public class Day03A {
         String[] redInput = input.next().split(",");
         String[] greenInput = input.next().split(",");
 
-        HashSet<Point> redPoints = new HashSet<Point>();
+        Set<Point> redPoints = new HashSet<Point>();
         Point currLoc = new Point();
 
         for (String move : redInput) {

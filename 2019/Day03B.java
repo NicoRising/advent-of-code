@@ -1,8 +1,6 @@
 import java.awt.Point;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.util.HashMap;
-import java.util.Scanner;
+import java.io.*;
+import java.util.*;
 
 public class Day03B{
     public static void main(String[] args) throws FileNotFoundException{
@@ -10,7 +8,7 @@ public class Day03B{
         String[] redInput = input.next().split(",");
         String[] greenInput = input.next().split(",");
 
-        HashMap<Point, Integer> redPoints = new HashMap<Point, Integer>();
+        Map<Point, Integer> redPoints = new HashMap<Point, Integer>();
         Point currLoc = new Point();
         int wireDist = 1;
 
