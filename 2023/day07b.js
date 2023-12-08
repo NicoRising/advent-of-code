@@ -71,7 +71,7 @@ function strength(hand) {
         strength.push(rank.indexOf(card));
     }
 
-    return strength
+    return strength;
 }
 
 fs.readFile("input.txt", "utf8", (err, text) => {
