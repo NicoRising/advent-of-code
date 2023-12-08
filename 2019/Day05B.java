@@ -138,14 +138,15 @@ public class Day05B {
 
         public int read(boolean print) {
             if (awaitingOutput) {
+                int out = output;
                 awaitingOutput = false;
                 run();
 
                 if (print) {
-                    System.out.println(output + "");
+                    System.out.println(out);
                 }
 
-                return output;
+                return out;
             } else {
                 throw new RuntimeException("Attempted to output while not awaiting output");
             }
