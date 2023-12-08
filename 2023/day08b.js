@@ -23,7 +23,7 @@ fs.readFile("input.txt", "utf8", (err, text) => {
         let lcm = 1;
         let step = 0;
 
-        while (!foundCycles.every(a => a == true)) {
+        while (!foundCycles.every(i => i)) {
             const instruct = instructs[step % instructs.length];
 
             ghostLocs = ghostLocs.map((node, idx) => {
