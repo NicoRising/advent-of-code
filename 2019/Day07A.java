@@ -1,79 +1,177 @@
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.util.Scanner;
+import java.io.*;
+import java.util.*;
 
 public class Day07A {
     public static void main(String[] args) throws FileNotFoundException {
         String[] input = new Scanner(new File("input.txt")).next().split(",");
         int[] program = new int[input.length];
+
         for (int index = 0; index < input.length; index++) {
             program[index] = Integer.parseInt(input[index]);
         }
-        int max = 0;
-        for (int a = 0; a < 5; a++) {
-            for (int b = 0; b < 5; b++) {
-                for (int c = 0; c < 5; c++) {
-                for (int d = 0; d < 5; d++) {
-                    for (int e = 0; e < 5; e++) {
-                        if (a != b && a != c && a != d && a != e && b != c && b != d && b != e && c != d && c != e && d != e) { // Why I did it this way I have no idea
-                            int output = run(program, new int[]{e, run(program, new int[]{d, run(program, new int[]{c, run(program, new int[]{b, run(program, new int[]{a, 0})})})})});
-                            max = output > max ? output : max;
+
+        System.out.println(maxSignal(new IntComputer(program), 0, new HashSet<Integer>()));
+    }
+
+    private static int maxSignal(IntComputer computer, int prevSignal, Set<Integer> used) {
+        int maxSignal = 0;
+
+        for (int setting = 0; setting < 5; setting++) {
+            if (!used.contains(setting)) {
+                Set<Integer> nextUsed = new HashSet<Integer>(used);
+                nextUsed.add(setting);
+
+                computer.run();
+                computer.write(setting);
+                computer.write(prevSignal);
+
+                int outSignal = computer.read();
+                computer.reset();
+
+                if (nextUsed.size() < 5) {
+                    outSignal = maxSignal(computer, outSignal, nextUsed);
+                }
+
+                maxSignal = outSignal > maxSignal ? outSignal : maxSignal;
+            }
+        }
+
+        return maxSignal;
+    }
+
+    private static class IntComputer {
+        int[] originalProgram;
+        int[] program;
+
+        int pointer;
+
+        boolean isHalted;
+        boolean awaitingInput;
+        boolean awaitingOutput;
+
+        int inputIdx;
+        int output;
+
+        public IntComputer(int[] program) {
+            this.originalProgram = program;
+            reset();
+        }
+
+        public void reset() {
+            this.program = originalProgram.clone();
+            pointer = 0;
+
+            isHalted = false;
+            awaitingInput = false;
+            awaitingOutput = false;
+        }
+
+        public void dump() {
+            System.out.println(Arrays.toString(program));
+        }
+
+        public void run() {
+            while (!isHalted && !awaitingInput && !awaitingOutput) {
+                int op = program[pointer++];
+                int[] operands;
+
+                switch (op % 100) {
+                    case 1:
+                        // Add
+                        operands = getOperands(op, 2);
+                        program[program[pointer++]] = operands[0] + operands[1];
+                        break;
+                    case 2:
+                        // Multiply
+                        operands = getOperands(op, 2);
+                        program[program[pointer++]] = operands[0] * operands[1];
+                        break;
+                    case 3:
+                        // Input
+                        awaitingInput = true;
+                        inputIdx = program[pointer++];
+                        break;
+                    case 4:
+                        // Output
+                        operands = getOperands(op, 1);
+                        awaitingOutput = true;
+                        output = operands[0];
+                        break;
+                    case 5:
+                        // Jump-if-true
+                        operands = getOperands(op, 2);
+
+                        if (operands[0] != 0) {
+                            pointer = operands[1];
                         }
-                    }
-                }
+
+                        break;
+                    case 6:
+                        // Jump-if-false
+                        operands = getOperands(op, 2);
+
+                        if (operands[0] == 0) {
+                            pointer = operands[1];
+                        }
+
+                        break;
+                    case 7:
+                        // Less than
+                        operands = getOperands(op, 2);
+                        program[program[pointer++]] = operands[0] < operands[1] ? 1 : 0;
+                        break;
+                    case 8:
+                        // Equals
+                        operands = getOperands(op, 2);
+                        program[program[pointer++]] = operands[0] == operands[1] ? 1 : 0;
+                        break;
+                    case 99:
+                        // Halt
+                        isHalted = true;
+                        break;
+                    default:
+                        throw new RuntimeException("Unknown opcode: " + op);
                 }
             }
         }
-        System.out.println(max);
-    }
 
-    public static int run(int[] program, int[] input) {
-        int index = 0;
-        int inputIndex = 0;
-        while (true) {
-            String command = program[index] + "";
-            while (command.length() < 5) {
-                command = '0' + command;
+        public int[] getOperands(int op, int arity) {
+            int[] operands = new int[arity];
+
+            for (int idx = 0, mag = 100; idx < arity; idx++, mag *= 10) {
+                operands[idx] = program[op / mag % 10 == 0 ? program[pointer++] : pointer++];
             }
-            int op = Integer.parseInt(command.substring(3));
-            int mode1 = Integer.parseInt(command.charAt(2) + "");
-            int mode2 = Integer.parseInt(command.charAt(1) + "");
-            switch (op) {
-                case 1:
-                    program[program[index + 3]] = getIndex(mode1, index + 1, program) + getIndex(mode2, index + 2, program);
-                    index += 4;
-                    break;
-                case 2:
-                    program[program[index + 3]] = getIndex(mode1, index + 1, program) * getIndex(mode2, index + 2, program);
-                    index += 4;
-                    break;
-                case 3:
-                    program[program[index + 1]] = input[inputIndex++];
-                    index += 2;
-                    break;
-                case 4:
-                    return getIndex(mode1, index + 1, program);
-                case 5:
-                    index = getIndex(mode1, index + 1, program) != 0 ? getIndex(mode2, index + 2, program) : index + 3;
-                    break;
-                case 6:
-                    index = getIndex(mode1, index + 1, program) == 0 ? getIndex(mode2, index + 2, program) : index + 3;
-                    break;
-                case 7:
-                    program[program[index + 3]] = getIndex(mode1, index + 1, program) < getIndex(mode2, index + 2, program) ? 1 : 0;
-                    index += 4;
-                    break;
-                case 8:
-                    program[program[index + 3]] = getIndex(mode1, index + 1, program) == getIndex(mode2, index + 2, program) ? 1 : 0;
-                    index += 4;
-                    break;
-                default:
-                    return 0;
+
+            return operands;
+        }
+
+        public void write(int input) {
+            if (awaitingInput) {
+                awaitingInput = false;
+                program[inputIdx] = input;
+                run();
+            } else {
+                throw new RuntimeException("Attempted to input while not awaiting input: " + input);
             }
         }
-    }
 
-    public static int getIndex(int mode, int index, int[] program) {
-        return mode == 0 ? program[program[index]] : program[index];
+        public int read() {
+            return read(false);
+        }
+
+        public int read(boolean print) {
+            if (awaitingOutput) {
+                awaitingOutput = false;
+                run();
+
+                if (print) {
+                    System.out.println(output + "");
+                }
+
+                return output;
+            } else {
+                throw new RuntimeException("Attempted to output while not awaiting output");
+            }
+        }
     }
 }
