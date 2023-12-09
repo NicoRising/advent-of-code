@@ -15,7 +15,7 @@ fs.readFile("input.txt", "utf8", (err, text) => {
             let last = sequences.at(-1);
 
             while (last.some(num => num)) {
-                sequences.push(last.slice(1).map((num, idx) => num - last[idx]))
+                sequences.push(last.slice(1).map((num, idx) => num - last[idx]));
                 last = sequences.at(-1);
             }
 
