@@ -1,206 +1,289 @@
 import java.awt.Point;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.util.ArrayList;
-import java.util.Scanner;
+import java.io.*;
+import java.util.*;
 
 public class Day11B {
     public static void main(String[] args) throws FileNotFoundException {
-        final int WIDTH = 500;
         String[] input = new Scanner(new File("input.txt")).next().split(",");
         long[] program = new long[input.length];
-        for (int i = 0; i < input.length; i++) {
-            program[i] = Long.parseLong(input[i]);
+
+        for (int index = 0; index < input.length; index++) {
+            program[index] = Long.parseLong(input[index]);
         }
-        Intputer ant = new Intputer(program);
-        int[][] grid = new int[WIDTH][WIDTH];
-        for (int x = 0; x < WIDTH; x++) {
-            for (int y = 0; y < WIDTH; y++) {
-                grid[x][y] = 0;
-            }
-        }
-        Point location = new Point(WIDTH / 2,WIDTH / 2);
-        grid[location.x][location.y] = 1;
-        int dir = 0;
-        while (!ant.isHalted()) {
-            ant.input(grid[location.x][location.y]);
-            long[] output = ant.getOutput();
-            grid[location.x][location.y] = (int) output[0];
-            dir += output[1] == 0 ? -1 : 1;
-            dir = Math.floorMod(dir, 4);
-            location = new Point(location);
-            switch (dir) {
+
+        Point loc = new Point(0, 0);
+        int facing = 0;
+
+        Map<Point, Boolean> visited = new HashMap<Point, Boolean>();
+        visited.put(new Point(loc), true);
+
+        IntComputer computer = new IntComputer(program);
+        computer.run();
+
+        while (!computer.isHalted) {
+            boolean isWhite = visited.getOrDefault(loc, false);
+            computer.write(isWhite ? 1 : 0);
+
+            visited.put(new Point(loc), computer.read() == 1);
+            facing += computer.read() == 1 ? 1 : -1;
+
+            // floorMod appropriately handles negatives
+            facing = Math.floorMod(facing, 4);
+
+            switch (facing) {
                 case 0:
-                    location.translate(0, -1);
+                    loc.translate(0, 1);
                     break;
                 case 1:
-                    location.translate(1, 0);
+                    loc.translate(1, 0);
                     break;
                 case 2:
-                    location.translate(0, 1);
+                    loc.translate(0, -1);
                     break;
-                default:
-                    location.translate(-1, 0);
+                case 3:
+                    loc.translate(-1, 0);
             }
         }
-        int left = WIDTH;
-        int top = WIDTH;
-        int right = 0;
-        int bottom = 0;
-        for (int x = 0; x < WIDTH; x++) {
-            for (int y = 0; y < WIDTH; y++) {
-                if (grid[x][y] == 1) {
-                    left = Math.min(x, left);
-                    top = Math.min(y, top);
-                    right = Math.max(x + 1, right);
-                    bottom = Math.max(y + 1, bottom);
+
+        int minX = 0;
+        int maxX = 0;
+        int minY = 0;
+        int maxY = 0;
+
+        for (Map.Entry<Point, Boolean> entry : visited.entrySet()) {
+            if (entry.getValue()) {
+                loc = entry.getKey();
+
+                if (loc.x < minX) {
+                    minX = loc.x;
+                } else if (loc.x > maxX) {
+                    maxX = loc.x;
+                }
+
+                if (loc.y < minY) {
+                    minY = loc.y;
+                } else if (loc.y > maxY) {
+                    maxY = loc.y;
                 }
             }
         }
-        int[][] displayGrid = new int[right - left][bottom - top];
-        for (int x = left; x < right; x++) {
-            for (int y = top; y < bottom; y++) {
-                displayGrid[x - left][y - top] = grid[x][y];
+
+        String identifier = "";
+
+        for (int y = maxY; y >= minY; y--) {
+            for (int x = minX; x <= maxX; x++) {
+                identifier += visited.getOrDefault(new Point(x, y), false) ? "#" : " ";
             }
+
+            identifier += "\n";
         }
-        display(displayGrid);
+
+        System.out.print(identifier);
     }
 
-    private static void display(int[][] grid) {
-        for (int y = 0; y < grid[0].length; y++) {
-            String output = "";
-            for (int x = 0; x < grid.length; x++) {
-                output += grid[x][y] == 0 ? ' ' : '#';
-            }
-            System.out.println(output);
-        }
-    }
+    private static class IntComputer {
+        long[] originalProgram;
+        long[] program;
 
-    private static class Intputer {
-        private long[] program;
-        private int index;
-        private int inputIndex;
-        private long relative;
-        private boolean halted;
-        private ArrayList<Long> output;
+        long pointer;
+        long relativeBase;
 
-        public Intputer(long[] program) {
-            this.program = new long[program.length + 1000];
-            for (int i = 0; i < this.program.length; i++) {
-                this.program[i] = i < program.length ? program[i] : 0;
-            }
-            index = 0;
-            relative = 0;
-            halted = false;
-            output = new ArrayList<>();
-            process();
+        boolean isHalted;
+        boolean awaitingInput;
+        boolean awaitingOutput;
+
+        long inputIdx;
+        long output;
+
+        public IntComputer(long[] program) {
+            this.originalProgram = program;
+            reset();
         }
 
-        public void input(int input) {
-            program[inputIndex] = input;
-            process();
+        public void reset() {
+            this.program = originalProgram.clone();
+            pointer = 0;
+            relativeBase = 0;
+
+            isHalted = false;
+            awaitingInput = false;
+            awaitingOutput = false;
         }
 
-        public long[] getOutput() {
-            long[] out = new long[output.size()];
-            for (int i = 0; i < out.length; i++) {
-                out[i] = output.get(i).longValue();
-            }
-            output.clear();
-            return out;
+        public void dump() {
+            System.out.println(Arrays.toString(program));
         }
 
-        public boolean isHalted() {
-            return halted;
-        }
+        public void run() {
+            while (!isHalted && !awaitingInput && !awaitingOutput) {
+                long op = get(pointer++);
+                long[] operands;
 
-        private void process() {
-            boolean paused = false;
-            while (!paused && !halted) {
-                String command = program[index] + "";
-                while (command.length() < 5) {
-                    command = '0' + command;
-                }
-                int a = 0;
-                int b = 0;
-                int c = 0;
-                if (index < program.length - 1) {
-                    switch (command.charAt(2)) {
-                        case '0':
-                            a = (int)program[index + 1];
-                            break;
-                        case '1':
-                            a = index + 1;
-                            break;
-                        default:
-                            a = (int)(program[index + 1] + relative);
-                    }
-                    if (index < program.length - 2) {
-                        switch (command.charAt(1)) {
-                            case '0':
-                                b = (int)program[index + 2];
-                                break;
-                            case '1':
-                                b = index + 2;
-                                break;
-                            default:
-                                b = (int)(program[index + 2] + relative);
-                        }
-                        if (index < program.length - 3) {
-                            switch (command.charAt(0)) {
-                                case '0':
-                                    c = (int)program[index + 3];
-                                    break;
-                                case '1':
-                                    c = index + 3;
-                                    break;
-                                default:
-                                    c = (int)(program[index + 3] + relative);
-                            }
-                        }
-                    }
-                }
-                switch (Integer.parseInt(command.substring(3))) {
+                switch ((int)op % 100) {
                     case 1:
-                        program[c] = program[a] + program[b];
-                        index += 4;
+                        // Add
+                        operands = getParams(op, 3, true);
+                        set(operands[2], operands[0] + operands[1]);
                         break;
                     case 2:
-                        program[c] = program[a] * program[b];
-                        index += 4;
+                        // Multiply
+                        operands = getParams(op, 3, true);
+                        set(operands[2], operands[0] * operands[1]);
                         break;
                     case 3:
-                        inputIndex = a;
-                        index += 2;
-                        paused = true;
+                        // Input
+                        operands = getParams(op, 1, true);
+                        awaitingInput = true;
+                        inputIdx = operands[0];
                         break;
                     case 4:
-                        output.add(program[a]);
-                        index += 2;
+                        // Output
+                        operands = getParams(op, 1, false);
+                        awaitingOutput = true;
+                        output = operands[0];
                         break;
                     case 5:
-                        index = program[a] != 0 ? (int)program[b] : index + 3;
+                        // Jump-if-true
+                        operands = getParams(op, 2, false);
+
+                        if (operands[0] != 0) {
+                            pointer = operands[1];
+                        }
+
                         break;
                     case 6:
-                        index = program[a] == 0 ? (int)program[b] : index + 3;
+                        // Jump-if-false
+                        operands = getParams(op, 2, false);
+
+                        if (operands[0] == 0) {
+                            pointer = operands[1];
+                        }
+
                         break;
                     case 7:
-                        program[c] = program[a] < program[b] ? 1 : 0;
-                        index += 4;
+                        // Less than
+                        operands = getParams(op, 3, true);
+                        set(operands[2], operands[0] < operands[1] ? 1 : 0);
                         break;
                     case 8:
-                        program[c] = program[a] == program[b] ? 1 : 0;
-                        index += 4;
+                        // Equals
+                        operands = getParams(op, 3, true);
+                        set(operands[2], operands[0] == operands[1] ? 1 : 0);
                         break;
                     case 9:
-                        relative += program[a];
-                        index += 2;
+                        // Relative base offset
+                        operands = getParams(op, 1, false);
+                        relativeBase += operands[0];
+                        break;
+                    case 99:
+                        // Halt
+                        isHalted = true;
                         break;
                     default:
-                        paused = true;
-                        halted = true;
+                        throw new RuntimeException("Unknown opcode: " + op);
                 }
+            }
+        }
+
+        public long[] getParams(long op, int arity, boolean hasWrite) {
+            long[] operands = new long[arity];
+
+            for (int idx = 0, mag = 100; idx < arity; idx++, mag *= 10) {
+                long mode = op / mag % 10;
+                long operandIdx;
+                
+                if (mode == 0) {
+                    // Position mode
+                    operandIdx = get(pointer++);
+                } else if (mode == 1) {
+                    // Immediate mode
+                    operandIdx = pointer++;
+                } else {
+                    // Relative mode
+                    operandIdx = get(pointer++) + relativeBase;
+                }
+
+                // If an operation will write to its final parameter, it should be sent as an index
+                if (hasWrite && idx == arity - 1) {
+                    operands[idx] = operandIdx;
+                } else {
+                    operands[idx] = get(operandIdx);
+                }
+            }
+
+            return operands;
+        }
+
+        // So I don't have to do so many casts
+        public long get(long idx) {
+            return get((int)idx);
+        }
+
+        // Basically an ArrayList, but only resizes exactly what it needs
+        public long get(int idx) {
+            if (idx < program.length) {
+                return program[idx];
+            } else {
+                long[] newProgram = new long[idx + 1];
+
+                // Utilizes the fact that Java long arrays initialize values to 0
+                for (int copyIdx = 0; copyIdx < program.length; copyIdx++) {
+                    newProgram[copyIdx] = program[copyIdx];
+                }
+
+                program = newProgram;
+                return program[idx];
+            }
+        }
+
+        public void set(long idx, long value) {
+            set((int)idx, value);
+        }
+
+        public void set(int idx, long value) {
+            if (idx < program.length) {
+                program[idx] = value;
+            } else {
+                long[] newProgram = new long[idx + 1];
+
+                for (int copyIdx = 0; copyIdx < program.length; copyIdx++) {
+                    newProgram[copyIdx] = program[copyIdx];
+                }
+
+                program = newProgram;
+                program[idx] = value;
+            }
+        }
+
+        public void write(long input) {
+            if (awaitingInput) {
+                awaitingInput = false;
+                set(inputIdx, input);
+                run();
+            } else {
+                throw new RuntimeException("Attempted to input while not awaiting input: " + input);
+            }
+        }
+
+        public long read() {
+            return read(false);
+        }
+
+        public long read(boolean print) {
+            if (awaitingOutput) {
+                long out = output;
+                awaitingOutput = false;
+                run();
+
+                if (print) {
+                    System.out.println(out);
+                }
+
+                return out;
+            } else {
+                throw new RuntimeException("Attempted to output while not awaiting output");
             }
         }
     }
 }
+
