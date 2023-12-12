@@ -1,78 +1,66 @@
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.util.ArrayList;
-import java.util.Scanner;
-import java.util.regex.Pattern;
-import java.util.regex.Matcher;
+import java.io.*;
+import java.util.*;
 
 public class Day12A {
     public static void main(String[] args) throws FileNotFoundException {
-        Scanner input = new Scanner(new File("input.txt"));
-        Pattern numbers = Pattern.compile("-?\\d+");
-        ArrayList<Moon> moons = new ArrayList<>();
-        while (input.hasNextLine()) {
-            Matcher match = numbers.matcher(input.nextLine());
-            match.find();
-            int x = Integer.parseInt(match.group());
-            match.find();
-            int y = Integer.parseInt(match.group());
-            match.find();
-            int z = Integer.parseInt(match.group());
-            moons.add(new Moon(x, y, z));
+        Scanner input = new Scanner(new File("input.txt")).useDelimiter("[^-\\d]+");
+        List<Moon> moons = new ArrayList<Moon>();
+
+        while (input.hasNext()) {
+            moons.add(new Moon(input.nextInt(), input.nextInt(), input.nextInt()));
         }
-        for (int step = 0; step < 1000; step++) {
-            for (int i = 0; i < moons.size(); i++) {
-                for (int j = i + 1; j < moons.size(); j++) {
-                    gravity(moons.get(i), moons.get(j));
+
+        for (int step = 0; step < 1_000; step++) {
+            for (Moon moonA : moons) {
+                for (Moon moonB : moons) {
+                    // A moon applying gravity to itself does nothing
+                    moonA.applyGravity(moonB);
                 }
             }
-            for (Moon moon: moons) {
-                moon.move();
-            }
-        }
-        int energy = 0;
-        for (Moon moon: moons) {
-            energy += moon.getEnergy();
-        }
-        System.out.println(energy);
-    }
 
-    public static void gravity(Moon a, Moon b) {
-        if (a.x != b.x) {
-            a.dx += a.x < b.x ? 1 : - 1;
-            b.dx += b.x < a.x ? 1 : - 1;
+            moons.forEach(moon -> moon.applyVelocity());
         }
-        if (a.y != b.y) {
-            a.dy += a.y < b.y ? 1 : - 1;
-            b.dy += b.y < a.y ? 1 : - 1;
-        }
-        if (a.z != b.z) {
-            a.dz += a.z < b.z ? 1 : - 1;
-            b.dz += b.z < a.z ? 1 : - 1;
-        }
+
+        System.out.println(moons.stream().mapToInt(moon -> moon.energy()).sum());
     }
 
     private static class Moon {
-        public int x, y, z;
-        public int dx, dy, dz;
+        int x, y, z;
+        int dx, dy, dz;
+
         public Moon(int x, int y, int z) {
             this.x = x;
             this.y = y;
             this.z = z;
+
+            dx = 0;
+            dy = 0;
+            dz = 0;
         }
 
-        public void move() {
+        public void applyVelocity() {
             x += dx;
             y += dy;
             z += dz;
         }
 
-        public int getEnergy() {
-            return (Math.abs(x) + Math.abs(y) + Math.abs(z)) * (Math.abs(dx) + Math.abs(dy) + Math.abs(dz));
+        public void applyGravity(Moon other) {
+            int xDiff = x - other.x;
+            int yDiff = y - other.y;
+            int zDiff = z - other.z;
+
+            dx -= xDiff > 0 ? 1 : xDiff < 0 ? -1 : 0;
+            dy -= yDiff > 0 ? 1 : yDiff < 0 ? -1 : 0;
+            dz -= zDiff > 0 ? 1 : zDiff < 0 ? -1 : 0;
+        }
+
+        public int energy() {
+            return (Math.abs(x)  + Math.abs(y)  + Math.abs(z)) *
+                   (Math.abs(dx) + Math.abs(dy) + Math.abs(dz));
         }
 
         public String toString() {
-            return "(" + x + ", " + y + ", " + z + ") (" + dx + ", " + dy + ", " + dz + ")";
+            return String.format("(<%d, %d, %d>, <%d, %d, %d>)", x, y, z, dx, dy, dz);
         }
     }
 }

@@ -1,125 +1,147 @@
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.Scanner;
-import java.util.regex.Pattern;
-import java.util.regex.Matcher;
+import java.awt.Point;
+import java.io.*;
+import java.util.*;
+import java.util.stream.Collectors;
 
 public class Day12B {
     public static void main(String[] args) throws FileNotFoundException {
-        Scanner input = new Scanner(new File("input.txt"));
-        Pattern numbers = Pattern.compile("-?\\d+");
-        ArrayList<Moon> moonList = new ArrayList<>();
-        while (input.hasNextLine()) {
-            Matcher match = numbers.matcher(input.nextLine());
-            match.find();
-            int x = Integer.parseInt(match.group());
-            match.find();
-            int y = Integer.parseInt(match.group());
-            match.find();
-            int z = Integer.parseInt(match.group());
-            moonList.add(new Moon(x,y,z));
+        Scanner input = new Scanner(new File("input.txt")).useDelimiter("[^-\\d]+");
+        List<Moon> moons = new ArrayList<Moon>();
+
+        while (input.hasNext()) {
+            moons.add(new Moon(input.nextInt(), input.nextInt(), input.nextInt()));
         }
-        Moon[] moons = moonList.toArray(new Moon[moonList.size()]);
-        Moon[] origin = new Moon[moons.length];
-        for (int i = 0; i < moons.length; i++) {
-            origin[i] = new Moon(moons[i]);
+
+        int xRepeat = 0;
+        int yRepeat = 0;
+        int zRepeat = 0;
+
+        Set<List<Point>> xHistory = new HashSet<List<Point>>();
+        Set<List<Point>> yHistory = new HashSet<List<Point>>();
+        Set<List<Point>> zHistory = new HashSet<List<Point>>();
+
+        int step = 0;
+
+        while (xRepeat * yRepeat * zRepeat == 0) {
+            List<Point> xPoints = new ArrayList<Point>();
+            List<Point> yPoints = new ArrayList<Point>();
+            List<Point> zPoints = new ArrayList<Point>();
+
+            for (Moon moon : moons) {
+                xPoints.add(new Point(moon.x, moon.dx));
+                yPoints.add(new Point(moon.y, moon.dy));
+                zPoints.add(new Point(moon.z, moon.dz));
+            }
+
+            if (xRepeat == 0) {
+                if (xHistory.contains(xPoints)) {
+                    xRepeat = step;
+                } else {
+                    xHistory.add(xPoints);
+                }
+            }
+
+            if (yRepeat == 0) {
+                if (yHistory.contains(yPoints)) {
+                    yRepeat = step;
+                } else {
+                    yHistory.add(yPoints);
+                }
+            }
+
+            if (zRepeat == 0) {
+                if (zHistory.contains(zPoints)) {
+                    zRepeat = step;
+                } else {
+                    zHistory.add(zPoints);
+                }
+            }
+
+            for (Moon moonA : moons) {
+                for (Moon moonB : moons) {
+                    // A moon applying gravity to itself does nothing
+                    moonA.applyGravity(moonB);
+                }
+            }
+
+            moons.forEach(moon -> moon.applyVelocity());
+            step++;
         }
-        long xRepeat = 0;
-        long yRepeat = 0;
-        long zRepeat = 0;
-        long step = 0;
-        for (; xRepeat * yRepeat * zRepeat == 0; step++) {
-            if (step%1 != 0) {
-                System.out.println(step);
-                for (int i = 0; i < moons.length; i++) {
-                    System.out.println(moons[i]);
+
+        Map<Integer, Integer> factors = new HashMap<Integer, Integer>();
+
+        for (int num : new int[]{xRepeat, yRepeat, zRepeat}) {
+            for (int divisor = 2; divisor <= num; divisor++) {
+                int count = 0;
+
+                while (num % divisor == 0) {
+                    num /= divisor;
+                    count++;
                 }
-                System.out.println();
-            }
-            for (int i = 0; i < moons.length; i++) {
-                for (int j = i + 1; j < moons.length; j++) {
-                    gravity(moons[i],moons[j]);
-                }
-            }
-            for (int i = 0; i < moons.length; i++) {
-                moons[i].move();
-            }
-            xRepeat = xRepeat == 0 ? step + 1 : xRepeat;
-            yRepeat = yRepeat == 0 ? step + 1 : yRepeat;
-            zRepeat = zRepeat == 0 ? step + 1 : zRepeat;
-            for (int i = 0; i < moons.length; i++) {
-                if (xRepeat == step + 1) {
-                    if (moons[i].x != origin[i].x || moons[i].dx != origin[i].dx) {
-                        xRepeat = 0;
+
+                if (count > 0) {
+                    int currPow = factors.getOrDefault(divisor, 0);
+
+                    if (count > currPow) {
+                        factors.put(divisor, count);
                     }
                 }
-                if (yRepeat == step + 1) {
-                    if (moons[i].y != origin[i].y || moons[i].dy != origin[i].dy) {
-                        yRepeat = 0;
-                    }
-                }
-                if (zRepeat == step + 1) {
-                    if (moons[i].z != origin[i].z || moons[i].dz != origin[i].dz) {
-                        zRepeat = 0;
-                    }
-                }
             }
         }
-        long lcm = xRepeat * yRepeat / BigInteger.valueOf(xRepeat).gcd(BigInteger.valueOf(yRepeat)).longValue();
-        lcm *= zRepeat / BigInteger.valueOf(lcm).gcd(BigInteger.valueOf(zRepeat)).longValue();
-        System.out.println(lcm);
-    }
-    
-    public static void gravity(Moon a, Moon b) {
-        if(a.x != b.x) {
-            a.dx += a.x < b.x ? 1 : - 1;
-            b.dx += b.x < a.x ? 1 : - 1;
-        }
-        if(a.y != b.y) {
-            a.dy += a.y < b.y ? 1 : - 1;
-            b.dy += b.y < a.y ? 1 : - 1;
-        }
-        if(a.z != b.z) {
-            a.dz += a.z < b.z ? 1 : - 1;
-            b.dz += b.z < a.z ? 1 : - 1;
-        }
+
+        System.out.println(factors.entrySet()
+                                  .stream()
+                                  .map(entry -> (long)Math.pow(entry.getKey(), entry.getValue()))
+                                  .reduce(1L, (acc, num) -> acc * num));
     }
 
     private static class Moon {
-        public int x, y, z;
-        public int dx, dy, dz;
+        int x, y, z;
+        int dx, dy, dz;
+
         public Moon(int x, int y, int z) {
             this.x = x;
             this.y = y;
             this.z = z;
+
             dx = 0;
             dy = 0;
             dz = 0;
         }
 
         public Moon(Moon moon) {
-            this.x = moon.x;
-            this.y = moon.y;
-            this.z = moon.z;
-            this.dx = moon.dx;
-            this.dy = moon.dy;
-            this.dz = moon.dz;
+            x = moon.x;
+            y = moon.y;
+            z = moon.z;
+
+            dx = moon.dx;
+            dy = moon.dy;
+            dz = moon.dz;
         }
 
-        public void move() {
+        public void applyVelocity() {
             x += dx;
             y += dy;
             z += dz;
         }
 
-        public int getEnergy() {
-            return (Math.abs(x) + Math.abs(y) + Math.abs(z)) * (Math.abs(dx) + Math.abs(dy) + Math.abs(dz));
+        public void applyGravity(Moon other) {
+            int xDiff = x - other.x;
+            int yDiff = y - other.y;
+            int zDiff = z - other.z;
+
+            dx -= xDiff > 0 ? 1 : xDiff < 0 ? -1 : 0;
+            dy -= yDiff > 0 ? 1 : yDiff < 0 ? -1 : 0;
+            dz -= zDiff > 0 ? 1 : zDiff < 0 ? -1 : 0;
+        }
+
+        public int energy() {
+            return (Math.abs(x)  + Math.abs(y)  + Math.abs(z)) *
+                   (Math.abs(dx) + Math.abs(dy) + Math.abs(dz));
         }
 
         public String toString() {
-            return "(" + x + ", " + y + ", " + z + ") (" + dx + ", " + dy + ", " + dz + ")";
+            return String.format("(<%d, %d, %d>, <%d, %d, %d>)", x, y, z, dx, dy, dz);
         }
     }
 }
