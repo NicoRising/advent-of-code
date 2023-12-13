@@ -1,6 +1,5 @@
 const fs = require("node:fs");
 
-// -1 indicates an i
 function sameRow(pattern, rowA, rowB, smudges) {
     for (let col = 0; col < pattern[0].length; col++) {
         if (pattern[rowA][col] != pattern[rowB][col]) {
