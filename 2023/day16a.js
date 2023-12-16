@@ -55,6 +55,7 @@ fs.readFile("input.txt", "utf8", (err, text) => {
 
         while (changed) {
             changed = false;
+
             for (let beam of light) {
                 beam = beam.split(",").map(val => Number(val));
 

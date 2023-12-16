@@ -37,9 +37,9 @@ function process(beam, grid) {
                 dirs = [dir];
         }
 
-        return dirs.map(dir => [row, col, dir]);
+        return [false, dirs.map(dir => [row, col, dir])];
     } else {
-        return [];
+        return [true, [[row, col, dir]]];
     }
 }
 
@@ -47,19 +47,25 @@ function calcEnergized(beam, grid) {
     const light = new Set();
     light.add(beam.join(","));
 
+    const exitedTiles = new Set();
     let changed = true;
 
     while (changed) {
         changed = false;
-        for (let beam of light) {
-            beam = beam.split(",").map(val => Number(val));
 
-            for (const newBeam of process(beam, grid)) {
-                if (changed || !light.has(newBeam.join(","))) {
-                    changed = true;
+        for (const beam of light) {
+            const [exited, newBeams] = process(beam.split(",").map(val => Number(val)), grid);
+
+            if (!exited) {
+                for (const newBeam of newBeams) {
+                    if (changed || !light.has(newBeam.join(","))) {
+                        changed = true;
+                    }
+
+                    light.add(newBeam.join(","));
                 }
-
-                light.add(newBeam.join(","));
+            } else {
+                exitedTiles.add(newBeams[0][0] + "," + newBeams[0][1]);
             }
         }
     }
@@ -77,7 +83,7 @@ function calcEnergized(beam, grid) {
         }
     }
 
-    return energized;
+    return [energized, exitedTiles];
 }
 
 fs.readFile("input.txt", "utf8", (err, text) => {
@@ -86,16 +92,30 @@ fs.readFile("input.txt", "utf8", (err, text) => {
     } else {
         const grid = text.split("\n").slice(0, -1);
 
+        const exitedTiles = new Set();
         let maxEnergized = 0;
+        let nice = 0;
 
         for (let row = 0; row < grid.length; row++) {
-            maxEnergized = Math.max(calcEnergized([row, -1, 0], grid), maxEnergized);
-            maxEnergized = Math.max(calcEnergized([row, grid[row].length, 2], grid), maxEnergized);
+            for (const [col, dir] of [[-1, 0], [grid[row].length, 2]]) {
+                if (!exitedTiles.has(row + "," + col)) {
+                    const [energized, newExited] = calcEnergized([row, col, dir], grid);
+                    
+                    maxEnergized = energized > maxEnergized ? energized : maxEnergized;
+                    newExited.forEach(tile => exitedTiles.add(tile));
+                }
+            }
         }
 
         for (let col = 0; col < grid[0].length; col++) {
-            maxEnergized = Math.max(calcEnergized([-1, col, 1], grid), maxEnergized);
-            maxEnergized = Math.max(calcEnergized([grid.length, col, 3], grid), maxEnergized);
+            for (const [row, dir] of [[-1, 1], [grid.length, 3]]) {
+                if (!exitedTiles.has(row + "," + col)) {
+                    const [energized, newExited] = calcEnergized([row, col, dir], grid);
+                    
+                    maxEnergized = energized > maxEnergized ? energized : maxEnergized;
+                    newExited.forEach(tile => exitedTiles.add(tile));
+                }
+            }
         }
  
         console.log(maxEnergized);
