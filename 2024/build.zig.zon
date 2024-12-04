@@ -2,6 +2,12 @@
     .name = "advent-of-code-2024",
     .version = "0.0.0",
     .minimum_zig_version = "0.13.0",
+    .dependencies = .{
+        .regex = .{
+            .url = "https://github.com/tiehuis/zig-regex/archive/refs/heads/master.zip",
+            .hash = "1220b497739b6fd60f627da85862cbd0cec01f3d6b7ddaa923057a7999ecfa138704",
+        },
+    },
     .paths = .{
         "build.zig",
         "build.zig.zon",
