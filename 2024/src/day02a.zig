@@ -1,9 +1,5 @@
 const std = @import("std");
 
-fn parseInt(str: []const u8) !i32 {
-    return std.fmt.parseInt(i32, str, 10);
-}
-
 fn solve(input: []const u8) !u32 {
     var safe_count: u32 = 0;
 
@@ -11,12 +7,12 @@ fn solve(input: []const u8) !u32 {
     while (line_iter.next()) |line| {
         var num_iter = std.mem.tokenizeScalar(u8, line, ' ');
 
-        var last_level = try parseInt(num_iter.next().?);
+        var last_level = try std.fmt.parseInt(i32, num_iter.next().?, 10);
         var is_increasing = true;
         var is_decreasing = true;
 
         while (num_iter.next()) |num| {
-            const curr_level = try parseInt(num);
+            const curr_level = try std.fmt.parseInt(i32, num, 10);
             const diff = curr_level - last_level;
 
             if (diff <= 0 or @abs(diff) > 3) {

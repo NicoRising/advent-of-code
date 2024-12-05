@@ -6,8 +6,16 @@ fn lessThan(context: void, a: u32, b: u32) std.math.Order {
 }
 
 fn solve(input: []const u8) !u32 {
-    var left_queue = std.PriorityQueue(u32, void, lessThan).init(std.heap.page_allocator, {});
-    var right_queue = std.PriorityQueue(u32, void, lessThan).init(std.heap.page_allocator, {});
+    var gpa = std.heap.GeneralPurposeAllocator(.{}){};
+    defer _ = gpa.deinit();
+
+    const allocator = gpa.allocator();
+
+    var left_queue = std.PriorityQueue(u32, void, lessThan).init(allocator, {});
+    defer left_queue.deinit();
+
+    var right_queue = std.PriorityQueue(u32, void, lessThan).init(allocator, {});
+    defer right_queue.deinit();
 
     var line_iter = std.mem.tokenizeScalar(u8, input, '\n');
     while (line_iter.next()) |line| {

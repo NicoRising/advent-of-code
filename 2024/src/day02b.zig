@@ -1,11 +1,17 @@
 const std = @import("std");
 
 fn solve(input: []const u8) !u32 {
+    var gpa = std.heap.GeneralPurposeAllocator(.{}){};
+    defer _ = gpa.deinit();
+
+    const allocator = gpa.allocator();
+
     var safe_count: u32 = 0;
 
     var line_iter = std.mem.tokenizeScalar(u8, input, '\n');
     while (line_iter.next()) |line| {
-        var levels = std.ArrayList(i32).init(std.heap.page_allocator);
+        var levels = std.ArrayList(i32).init(allocator);
+        defer levels.deinit();
 
         var num_iter = std.mem.tokenizeScalar(u8, line, ' ');
         while (num_iter.next()) |num| {

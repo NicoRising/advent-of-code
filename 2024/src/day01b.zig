@@ -3,7 +3,11 @@ const std = @import("std");
 const Counts = struct { left_count: u32, right_count: u32 };
 
 fn solve(input: []const u8) !u32 {
-    var counts = std.AutoHashMap(u32, Counts).init(std.heap.page_allocator);
+    var gpa = std.heap.GeneralPurposeAllocator(.{}){};
+    defer _ = gpa.deinit();
+
+    var counts = std.AutoHashMap(u32, Counts).init(gpa.allocator());
+    defer counts.deinit();
 
     var line_iter = std.mem.tokenizeScalar(u8, input, '\n');
     while (line_iter.next()) |line| {
