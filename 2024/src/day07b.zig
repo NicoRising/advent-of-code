@@ -15,7 +15,7 @@ fn solvable(result: u64, operands: []u64) !bool {
             return true;
         }
 
-        const divisor = std.math.pow(u64, 10, std.math.log_int(u64, 10, next_operand) + 1);
+        const divisor = std.math.pow(u64, 10, std.math.log10(next_operand) + 1);
 
         if ((result - next_operand) % divisor == 0) {
             return solvable((result - next_operand) / divisor, rest_operands);
